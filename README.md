@@ -46,7 +46,7 @@ dsh-vidgen-plugin/
 │   ├── httpscript.js        # 子进程 HTTP(json body 参数化)
 │   ├── cleanscript.js       # 清理临时配置
 │   ├── histscript.js        # 生成历史持久化(读写)
-│   └── runner.js            # node 版本探测辅助
+│   └── runner.js            # 旧脚本包装器(已不需要,脚本自带 __arg 可直接 node 调用)
 └── README.md
 ```
 
