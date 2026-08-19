@@ -1,4 +1,5 @@
-(async () => {
+globalThis.__arg = process.argv[2] || ''
+;(async () => {
 const fs=require("fs"),os=require("os"),path=require("path");
 const home=process.env.HOME||os.homedir()||"";
 const dshHome=process.env.DSH_HOME||path.join(home,".dsh");
