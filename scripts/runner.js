@@ -1,0 +1,1 @@
+(async()=>{const s=Buffer.from(process.argv[1],"base64").toString("utf8");globalThis.__arg=process.argv[2]||"";eval(s)})()
