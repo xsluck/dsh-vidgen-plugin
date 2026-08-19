@@ -28,9 +28,9 @@ return {
 
     const history = []
     function upsertHistory(entry) {
-      const id = entry.task_id || entry.video_id || ''
+      const id = entry.task_id || entry.video_id || entry.url || ('e' + Date.now())
       const idx = history.findIndex((h) => h.task_id === id)
-      const row = { prompt: entry.prompt || '', task_id: id, video_id: entry.video_id || '', status: entry.status || 'pending', url: entry.url || '', seconds: entry.seconds || '', size: entry.size || '', ts: entry.ts || Date.now() }
+      const row = { kind: entry.kind || 'video', prompt: entry.prompt || '', task_id: id, video_id: entry.video_id || '', status: entry.status || 'pending', url: entry.url || '', seconds: entry.seconds || '', size: entry.size || '', ts: entry.ts || Date.now() }
       if (idx >= 0) history[idx] = Object.assign({}, history[idx], row)
       else history.unshift(row)
       while (history.length > 12) history.pop()
@@ -478,6 +478,7 @@ return {
         const item = data && Array.isArray(data.data) && data.data[0]
         const url = item && (item.url || '')
         if (!url) return { error: '生图接口未返回图片 URL: ' + JSON.stringify(data).slice(0, 300) }
+        upsertHistory({ kind: 'image', prompt: String(args.prompt || ''), url })
         return { url }
       } catch (e) { return { error: String((e && e.message) || e) } }
     })

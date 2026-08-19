@@ -668,9 +668,11 @@ return {
         }
       }
 
-      const hist = history.slice(0, 8).map((h) => (h.status === 'completed' && h.url)
-        ? el('video', { key: h.task_id + h.ts, src: h.url, preload: 'metadata', muted: true, playsInline: true, title: h.prompt || '点击打开视频', onClick: (e) => { e.stopPropagation(); openHistory(h) } })
-        : el('span', { key: h.task_id + h.ts, style: { fontSize: 10, alignSelf: 'center' } }, '⏳'))
+      const hist = history.slice(0, 8).map((h) => ((h.status === 'completed' && h.url)
+        ? (h.kind === 'image'
+          ? el('img', { key: h.task_id + h.ts, src: h.url, preload: 'metadata', style: { width: 110, height: 62 }, className: 'vg-zoomable', title: h.prompt || '点击放大', onClick: (e) => { e.stopPropagation(); setZoomImg(h.url) } })
+          : el('video', { key: h.task_id + h.ts, src: h.url, preload: 'metadata', muted: true, playsInline: true, title: h.prompt || '点击打开视频', onClick: (e) => { e.stopPropagation(); openHistory(h) } }))
+        : el('span', { key: h.task_id + h.ts, style: { fontSize: 10, alignSelf: 'center' } }, '⏳')))
 
       let lightbox = null
       if (zoomImg) {
