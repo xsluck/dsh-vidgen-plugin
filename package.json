@@ -5,8 +5,12 @@
   "type": "commonjs",
   "main": "lib/index.js",
   "exports": {
-    ".": { "default": "./lib/index.js" },
-    "./client": { "default": "./lib/client.js" },
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -40,8 +44,7 @@
     "node": ">=20"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6"
+    "@deepseek-ai/cordis": "^4.0.1"
   },
   "dsh": {
     "bundle": {
@@ -54,5 +57,8 @@
       ],
       "platform": "web"
     }
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.7"
   }
 }
