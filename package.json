@@ -1,0 +1,58 @@
+{
+  "name": "dsh-vidgen-plugin",
+  "version": "0.1.0",
+  "description": "Multi-provider AI video/image generation plugin for DeepSeek Harness (DSH). ComfyUI-style node canvas studio + multi-provider settings, with agent tools list_video_models / generate_video / poll_video_task. | DeepSeek Harness AI 视频/图片生成插件：多提供者、节点画布工作室、Agent 工具与 REST RPC。",
+  "type": "commonjs",
+  "main": "lib/index.js",
+  "exports": {
+    ".": { "default": "./lib/index.js" },
+    "./client": { "default": "./lib/client.js" },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --check lib/index.js && node --check lib/client.js && echo 'Syntax OK'",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "dsh-bundle",
+    "video-generation",
+    "image-generation",
+    "text-to-video",
+    "image-to-video",
+    "keyframes",
+    "ai-video",
+    "agnes",
+    "node-canvas",
+    "vidgen"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-slots"
+      ],
+      "platform": "web"
+    }
+  }
+}

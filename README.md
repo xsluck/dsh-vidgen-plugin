@@ -1,9 +1,9 @@
 # dsh-vidgen-plugin · AI 视频 / 图片生成插件(DSH 动态 Cordis 插件)
 
 为 **DeepSeek Harness(DSH)Web GUI** 开发的多提供者 AI 视频/图片生成插件。
-以动态 Cordis 插件形式注入会话:浏览器侧提供 **ComfyUI 风格节点画布工作室** 与 **多提供者设置页**,宿主侧提供视频/图片生成、轮询、模型拉取、配置持久化等 18 个 RPC 方法与 3 个模型工具。
+以动态 Cordis 插件形式注入会话:浏览器侧提供 **ComfyUI 风格节点画布工作室** 与 **多提供者设置页**,宿主侧提供视频/图片生成、轮询、模型拉取、配置持久化等 24 个 RPC 方法与 3 个模型工具。
 
-> 本仓库是插件的可安装发布版。功能与已在会话内运行的 `vidgen-1/pkg-26` 等价;仓库内 `plugin/` 两段源码为发布形态(纯文本文件引用,无内嵌 base64 与机器绝对路径),所有辅助脚本明文存放于 `scripts/`。
+> 本仓库是插件的可安装发布版。功能与已在会话内运行的 `vidgen-1/pkg-6` 等价;仓库内 `plugin/` 两段源码为发布形态(纯文本文件引用,无内嵌 base64 与机器绝对路径),所有辅助脚本明文存放于 `scripts/`。
 
 ---
 
@@ -15,7 +15,8 @@
 - 本地图片上传(≤8MB,base64 仅支持图生图链路,视频链路需先经图生图生成平台图)
 - 缩放 / 平移 / 全屏悬浮工作室 / 图片点击放大
 - 运行单个节点或「⚡ 运行全部」(图片节点按依赖分层并行)
-- 生成历史最近 12 条,跨重启保留(宿主侧持久化)
+- 生成历史最近 12 条,跨重启保留(宿主侧持久化),支持逐条删除 / 清空
+- 画布**自动持久化 + 手动快照**:新画布自动存档,可保存 / 加载 / 删除快照,重启后恢复节点与连线
 
 ### ⚙️ 多提供者设置页(设置 → 视频生成)
 - **视频 / 图片各自独立**的提供者列表,每段任意多个平台,可随意「⭐ 设为当前」
@@ -37,16 +38,23 @@ OpenAI 风格 `/videos`、`/images/generations`、`/models` 接口。视频轮�
 
 ```
 dsh-vidgen-plugin/
+├── package.json           # 官方插件包元数据
+├── cordis.patch.yml       # 官方 bundle patch
+├── lib/
+│   ├── index.js           # 官方 host 入口(由 plugin/host.js 转换:tools + REST /dsh-vidgen/rpc)
+│   └── client.js          # 官方 client bundle(ModuleLoader,由 plugin/client.js 转换)
 ├── plugin/
-│   ├── host.js              # 宿主半区(返回对象,粘贴进 cordis_define 的 code.host)
-│   └── client.js            # 浏览器半区(粘贴进 code.client)
-├── scripts/                 # 宿主子进程辅助脚本(明文,路径由 SCRIPTS_DIR 指定)
-│   ├── vidgen-cfg-v3.js     # 配置读取(多提供者 v3)
-│   ├── vidgen-save-v3.js    # 配置保存 / 切换 / 删除 / 清除
-│   ├── httpscript.js        # 子进程 HTTP(json body 参数化)
-│   ├── cleanscript.js       # 清理临时配置
-│   ├── histscript.js        # 生成历史持久化(读写)
-│   └── runner.js            # 旧脚本包装器(已不需要,脚本自带 __arg 可直接 node 调用)
+│   ├── host.js            # 动态宿主半区(返回对象,粘贴进 cordis_define 的 code.host)
+│   └── client.js          # 动态浏览器半区(粘贴进 code.client)
+├── scripts/               # 宿主子进程辅助脚本(明文,路径由 SCRIPTS_DIR 指定)
+│   ├── vidgen-cfg-v3.js   # 配置读取(多提供者 v3)
+│   ├── vidgen-save-v3.js  # 配置保存 / 切换 / 删除 / 清除
+│   ├── httpscript.js      # 子进程 HTTP(json body 参数化)
+│   ├── cleanscript.js     # 清理临时配置
+│   ├── histscript.js      # 生成历史持久化(读写)
+│   ├── graphscript.js     # 画布持久化(读写)
+│   ├── snapscript.js      # 画布快照持久化(读写)
+│   └── runner.js          # 旧脚本包装器(已不需要,脚本自带 __arg 可直接 node 调用)
 └── README.md
 ```
 
@@ -54,7 +62,20 @@ dsh-vidgen-plugin/
 
 ## 安装
 
-1. 将本仓库 `scripts/` 放到任意目录(或直接克隆本仓库),确保其中 6 个脚本文件齐全。
+### 方式 A:官方插件包(推荐)
+
+```bash
+dsh plugin add /path/to/dsh-vidgen-plugin --profile web
+# 或本地 link 依赖:
+# cd ~/.dsh/profiles/web && pnpm add link:/path/to/dsh-vidgen-plugin
+```
+
+- host 入口为 `lib/index.js`,client 为 `lib/client.js`,REST RPC 地址 `/dsh-vidgen/rpc`。
+- `SCRIPTS_DIR` 默认相对包内 `scripts/` 解析;如脚本放在其他位置,用环境变量 `VIDGEN_SCRIPTS_DIR` 覆盖。
+
+### 方式 B:动态 Cordis 插件(原位)
+
+1. 将本仓库 `scripts/` 放到任意目录(或直接克隆本仓库),确保其中脚本文件齐全。
 2. 打开 `plugin/host.js`,把顶部常量改为你机器上的实际路径:
 
    ```js
@@ -72,7 +93,7 @@ dsh-vidgen-plugin/
 
 ### 依赖
 - DSH 宿主需可执行 `node`(自动探测常见路径,也可改 `resolveNodeBin()` 的候选列表加入你的 node 路径)。
-- 浏览器端依赖 DSH 提供的 React 全局与 `slots` / `timer` 服务(已在 inject 声明)。
+- 浏览器端依赖 DSH 提供的 React 与 `slots` 服务(官方 client inject: `dsh-client-runtime` + `dsh-client-ui-slots`)。
 
 ---
 

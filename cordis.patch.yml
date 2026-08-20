@@ -1,0 +1,8 @@
+# dsh-vidgen-plugin — AI 视频/图片生成插件
+# 官方插件包入口:lib/index.js 为 host,REST RPC 地址 /dsh-vidgen/rpc。
+# 注入 shell 用于调用 scripts/ 下的 node 辅助脚本(配置读取/保存、HTTP、历史/画布持久化)。
+- insert:
+    - id: vidgen
+      name: dsh-vidgen-plugin
+      inject: [tools, webServer, settings, shell]
+      config: {}
